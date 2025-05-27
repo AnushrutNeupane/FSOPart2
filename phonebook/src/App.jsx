@@ -10,20 +10,18 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
 
-  useEffect(()=>{
-    personService.getAll()
-    .then(initialPersons => {
-      setPersons(initialPersons)
-    })
-
-  },[])
+  useEffect(() => {
+    personService.getAll().then((initialPersons) => {
+      setPersons(initialPersons);
+    });
+  }, []);
 
   // Adding Name logic
   const addName = (event) => {
     event.preventDefault();
     const nameExists = persons.some((person) => person.name === newName);
     const numberExists = persons.some((person) => person.number === newNumber);
-    
+
     if (nameExists) {
       alert(`${newName} is already in the phonebook!`);
       return;
@@ -38,13 +36,13 @@ const App = () => {
       name: newName,
       number: newNumber,
     };
-    
-    personService.create(nameObject).then(returnedName => {
-      setPersons(persons.concat(returnedName))
-      setNewName("")
-      setNewNumber("")
-    })
-    
+
+    personService.create(nameObject).then((returnedName) => {
+      setPersons(persons.concat(returnedName));
+      setNewName("");
+      setNewNumber("");
+    });
+
     /*
     setPersons(persons.concat(nameObject));
     setNewName("");
@@ -66,13 +64,13 @@ const App = () => {
   };
 
   const handleDelete = (id) => {
-    const person = persons.find(p => p.id === id)
-    if (window.confirm(`Are you sure you want to delete ${person.name}?`)){
+    const person = persons.find((p) => p.id === id);
+    if (window.confirm(`Are you sure you want to delete ${person.name}?`)) {
       personService.remove(id).then(() => {
-        setPersons(persons.filter(p => p.id !== id))
-      }) 
+        setPersons(persons.filter((p) => p.id !== id));
+      });
     }
-  }
+  };
 
   const personsToShow =
     filter === ""
@@ -93,7 +91,7 @@ const App = () => {
         handleNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons persons={personsToShow} handleDelete={handleDelete}/>
+      <Persons persons={personsToShow} handleDelete={handleDelete} />
     </div>
   );
 };
