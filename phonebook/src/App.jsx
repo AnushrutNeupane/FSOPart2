@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
 import Filter from "./components/Filter";
-import axios from 'axios'
+import personService from "./services/personService";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -11,22 +11,19 @@ const App = () => {
   const [filter, setFilter] = useState("");
 
   useEffect(()=>{
-    console.log('effect')
-    axios
-    .get('http://localhost:3001/persons')
-    .then(response => {
-      console.log('promise fulfilled')
-      setPersons(response.data)
+    personService.getAll()
+    .then(initialPersons => {
+      setPersons(initialPersons)
     })
+
   },[])
-  console.log('render', persons.length, 'persons')
 
   // Adding Name logic
   const addName = (event) => {
     event.preventDefault();
     const nameExists = persons.some((person) => person.name === newName);
     const numberExists = persons.some((person) => person.number === newNumber);
-
+    
     if (nameExists) {
       alert(`${newName} is already in the phonebook!`);
       return;
@@ -39,12 +36,20 @@ const App = () => {
 
     const nameObject = {
       name: newName,
-      id: persons.length + 1,
       number: newNumber,
     };
+    
+    personService.create(nameObject).then(returnedName => {
+      setPersons(persons.concat(returnedName))
+      setNewName("")
+      setNewNumber("")
+    })
+    
+    /*
     setPersons(persons.concat(nameObject));
     setNewName("");
     setNewNumber("");
+    */
   };
 
   // Handlers
@@ -59,6 +64,15 @@ const App = () => {
   const handleFilterChange = (event) => {
     setFilter(event.target.value);
   };
+
+  const handleDelete = (id) => {
+    const person = persons.find(p => p.id === id)
+    if (window.confirm(`Are you sure you want to delete ${person.name}?`)){
+      personService.remove(id).then(() => {
+        setPersons(persons.filter(p => p.id !== id))
+      }) 
+    }
+  }
 
   const personsToShow =
     filter === ""
@@ -79,7 +93,7 @@ const App = () => {
         handleNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons persons={personsToShow}/>
+      <Persons persons={personsToShow} handleDelete={handleDelete}/>
     </div>
   );
 };
