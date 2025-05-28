@@ -3,12 +3,16 @@ import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
 import Filter from "./components/Filter";
 import personService from "./services/personService";
+import Notification from "./components/Notification";
+
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [confirmMessage, setConfirmMessage] = useState(null)
+  const [deleteMessage, setDeleteMessage] = useState(null)
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => {
@@ -37,10 +41,18 @@ const App = () => {
       number: newNumber,
     };
 
-    personService.create(nameObject).then((returnedName) => {
+    personService.create(nameObject)
+    .then((returnedName) => {
       setPersons(persons.concat(returnedName));
       setNewName("");
-      setNewNumber("");
+      setNewNumber(""); 
+    })
+    .then(()=> {
+      setConfirmMessage(
+        `${nameObject.name} has successfully been added to the list!`
+      )
+      setTimeout(() => {
+        setConfirmMessage(null)}, 4000)
     });
 
     /*
@@ -68,6 +80,9 @@ const App = () => {
     if (window.confirm(`Are you sure you want to delete ${person.name}?`)) {
       personService.remove(id).then(() => {
         setPersons(persons.filter((p) => p.id !== id));
+        setConfirmMessage(`${person.name} has successfully been deleted`)
+        setTimeout(()=> {
+          setConfirmMessage(null)}, 4000)
       });
     }
   };
@@ -82,6 +97,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={confirmMessage} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <PersonForm
         addName={addName}
